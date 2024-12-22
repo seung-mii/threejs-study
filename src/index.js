@@ -4,11 +4,10 @@ import { WEBGL } from './webgl'
 if (WEBGL.isWebGLAvailable()) {
   // 장면
   const scene = new THREE.Scene()
-  scene.background = new THREE.Color(0x004fff)
 
   // 카메라
   const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-  camera.position.z = 2 // cube가 보이도록 카메라의 z 위치 조절
+  camera.position.z = 3 // cube가 보이도록 카메라의 z 위치 조절
 
   // 렌더러
   const renderer = new THREE.WebGLRenderer({
@@ -19,39 +18,65 @@ if (WEBGL.isWebGLAvailable()) {
 
   document.body.appendChild(renderer.domElement)
 
-  // 매쉬
-  const geometry01 = new THREE.BoxGeometry(0.5, 0.5, 0.5)
-  const material01 = new THREE.MeshStandardMaterial({
-    color: 0x999999
+  // 빛
+  const pointLight = new THREE.PointLight(0xffffff, 1)
+  pointLight.position.set(0, 2, 12)
+  scene.add(pointLight)
+
+  // 도형
+  const geometry01 = new THREE.TorusGeometry(0.3, 0.15, 16, 40)
+  const material01 = new THREE.MeshBasicMaterial({ // MeshBasicMaterial은 빛 영향을 안받음
+    color: 0xFF7F00
   })
   const obj01 = new THREE.Mesh(geometry01, material01)
-  obj01.position.x = -1
+  obj01.position.x = -2
   scene.add(obj01)
   
-  const geometry02 = new THREE.ConeGeometry(0.4, 0.7, 6)
+  const geometry02 = new THREE.TorusGeometry(0.3, 0.15, 16, 40)
   const material02 = new THREE.MeshStandardMaterial({
-    color: 0x999999
+    color: 0xFF7F00,
+    metalness: 0.6,
+    roughness: 0.4,
   })
   const obj02 = new THREE.Mesh(geometry02, material02)
+  obj02.position.x = -1
   scene.add(obj02)
 
-  const geometry03 = new THREE.IcosahedronGeometry(0.4, 0)
-  const material03 = new THREE.MeshStandardMaterial({
-    color: 0x999999
+  const geometry03 = new THREE.TorusGeometry(0.3, 0.15, 16, 40)
+  const material03 = new THREE.MeshPhysicalMaterial({
+    color: 0xFF7F00,
+    clearcoat: 1,
+    clearcoatRoughness: 0.1
   })
   const obj03 = new THREE.Mesh(geometry03, material03)
-  obj03.position.x = 1
   scene.add(obj03)
 
-  function render(time) {
-    time *= 0.0005
+  const geometry04 = new THREE.TorusGeometry(0.3, 0.15, 16, 40)
+  const material04 = new THREE.MeshLambertMaterial({
+    color: 0xFF7F00
+  })
+  const obj04 = new THREE.Mesh(geometry04, material04)
+  obj04.position.x = 1
+  scene.add(obj04)
 
-    obj01.rotation.x = time
+  const geometry05 = new THREE.TorusGeometry(0.3, 0.15, 16, 40)
+  const material05 = new THREE.MeshPhongMaterial({
+    color: 0xFF7F00,
+    shininess: 60,
+    specular: 0x004fff
+  })
+  const obj05 = new THREE.Mesh(geometry05, material05)
+  obj05.position.x = 2
+  scene.add(obj05)
+
+  function render(time) {
+    time *= 0.001
+
     obj01.rotation.y = time
-    obj02.rotation.x = time
     obj02.rotation.y = time
-    obj03.rotation.x = time
     obj03.rotation.y = time
+    obj04.rotation.y = time
+    obj05.rotation.y = time
 
     renderer.render(scene, camera)
     requestAnimationFrame(render)
