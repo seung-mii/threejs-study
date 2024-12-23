@@ -6,8 +6,9 @@ if (WEBGL.isWebGLAvailable()) {
   const scene = new THREE.Scene()
 
   // 카메라
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-  camera.position.z = 3 // cube가 보이도록 카메라의 z 위치 조절
+  const camera = new THREE.PerspectiveCamera(120, window.innerWidth / window.innerHeight, 0.1, 1000)
+  camera.position.set(0, 1, 1.8)
+  camera.lookAt(new THREE.Vector3(0, 0, 0))
 
   // 렌더러
   const renderer = new THREE.WebGLRenderer({
@@ -19,66 +20,54 @@ if (WEBGL.isWebGLAvailable()) {
   document.body.appendChild(renderer.domElement)
 
   // 빛
-  const pointLight = new THREE.PointLight(0xffffff, 1)
-  pointLight.position.set(0, 2, 12)
-  scene.add(pointLight)
+  const ambientLight = new THREE.AmbientLight(0xffA500, 0.1) // 전역에서 비추는 빛이라 안보임
+  // scene.add(ambientLight)
 
-  // 텍스처
-  const textureLoader = new THREE.TextureLoader()
-  const textureBaseMap = textureLoader.load('../static/img/stone_basecolor.png');
-  const textureNormalMap = textureLoader.load('../static/img/stone_normal.png');
-  const textureHeightMap = textureLoader.load('../static/img/stone_height.png');
-  const textureRoughnessMap = textureLoader.load('../static/img/stone_roughness.png');
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5)
+  directionalLight.position.set(-1, 1, 1)
+  const dlHelper = new THREE.DirectionalLightHelper(directionalLight, 0.5, 0x0000ff) // 빛이 어디서 쏘는 지 알려줌
+  scene.add(directionalLight)
+  // scene.add(dlHelper)
+
+  const hemisphereLight = new THREE.HemisphereLight(0x0000ff, 0xff0000, 1) // 하늘색과 지상색 설정
+  // scene.add(hemisphereLight)
+
+  const pointLight = new THREE.PointLight(0xffffff, 1)
+  // scene.add(pointLight)
+  pointLight.position.set(-2, 0.5, 0.5)
+  const plHelper = new THREE.PointLightHelper(pointLight, 0.1) 
+  // scene.add(plHelper)
+
+  const rectLight = new THREE.RectAreaLight(0xffffff, 2, 1, 0.5)
+  // scene.add(rectLight)
+  rectLight.position.set(0.5, 0.5, 1)
+
+  const spotLight = new THREE.SpotLight(0xffffff, 0.5)
+  scene.add(spotLight)
+
 
   // 도형
-  const geometry01 = new THREE.SphereGeometry(0.3, 32, 16)
-  const material01 = new THREE.MeshStandardMaterial({ 
-    map: textureBaseMap
+  const geometry = new THREE.SphereGeometry(0.5, 32, 16)
+  const material = new THREE.MeshStandardMaterial({ 
+    color: 0xffffff
   })
-  const obj01 = new THREE.Mesh(geometry01, material01)
-  obj01.position.x = -1.5
-  scene.add(obj01)
+  const obj = new THREE.Mesh(geometry, material)
+  obj.rotation.y = 0.5
+  obj.position.y = 0.2
+  scene.add(obj)
   
-  const geometry02 = new THREE.SphereGeometry(0.3, 32, 16)
-  const material02 = new THREE.MeshStandardMaterial({
-    map: textureBaseMap,
-    normalMap: textureNormalMap
+  const planeGeometry = new THREE.PlaneGeometry(20, 20, 1, 1)
+  const planeMaterial = new THREE.MeshStandardMaterial({ 
+    color: 0xffffff
   })
-  const obj02 = new THREE.Mesh(geometry02, material02)
-  obj02.position.x = -0.5
-  scene.add(obj02)
-
-  const geometry03 = new THREE.SphereGeometry(0.3, 32, 16)
-  const material03 = new THREE.MeshStandardMaterial({
-    map: textureBaseMap,
-    normalMap: textureNormalMap,
-    displacementMap: textureHeightMap,
-    displacementScale: 0.05
-  })
-  const obj03 = new THREE.Mesh(geometry03, material03)
-  obj03.position.x = 0.5
-  scene.add(obj03)
-
-  const geometry04 = new THREE.SphereGeometry(0.3, 32, 16)
-  const material04 = new THREE.MeshStandardMaterial({
-    map: textureBaseMap,
-    normalMap: textureNormalMap,
-    displacementMap: textureHeightMap,
-    displacementScale: 0.05,
-    roughnessMap: textureRoughnessMap,
-    roughness: 0.5
-  })
-  const obj04 = new THREE.Mesh(geometry04, material04)
-  obj04.position.x = 1.5
-  scene.add(obj04)
-
+  const plane = new THREE.Mesh(planeGeometry, planeMaterial)
+  plane.rotation.x = -0.5 * Math.PI
+  plane.position.y = -0.2
+  scene.add(plane)
   function render(time) {
     time *= 0.001
 
-    obj01.rotation.y = time
-    obj02.rotation.y = time
-    obj03.rotation.y = time
-    obj04.rotation.y = time
+    // obj01.rotation.y = time
 
     renderer.render(scene, camera)
     requestAnimationFrame(render)
