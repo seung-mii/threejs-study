@@ -1,5 +1,7 @@
 import * as THREE from 'three'
 import { WEBGL } from './webgl'
+import { OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
+
 
 if (WEBGL.isWebGLAvailable()) {
   // 장면
@@ -20,14 +22,19 @@ if (WEBGL.isWebGLAvailable()) {
 
   document.body.appendChild(renderer.domElement)
 
+  // OrbitControls 추가
+  const controls = new OrbitControls(camera, renderer.domElement)
+  controls.minDistance = 1
+  controls.maxPolarAngle = Math.PI / 2  // 중간 이상 내려가지 않음
+  controls.update()
+
   // 빛
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5) // 전역에서 비추는 빛이라 안보임
-  // scene.add(ambientLight)
-  // ambientLight.castShadow = true  // 그림자 X
-
+  scene.add(ambientLight)
+  
   const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5)
-  directionalLight.position.set(-0.5, 1.5, -0.5)
-  const dlHelper = new THREE.DirectionalLightHelper(directionalLight, 0.5, 0x0000ff) // 빛이 어디서 쏘는 지 알려줌
+  directionalLight.position.set(-1.5, 2, 1)
+  const dlHelper = new THREE.DirectionalLightHelper(directionalLight, 0.2, 0x0000ff) // 빛이 어디서 쏘는 지 알려줌
   scene.add(directionalLight)
   scene.add(dlHelper)
   directionalLight.castShadow = true // 그림자 O
@@ -35,30 +42,8 @@ if (WEBGL.isWebGLAvailable()) {
   directionalLight.shadow.mapSize.height = 1024
   directionalLight.shadow.radius = 8 // 그림자 블러
 
-  const hemisphereLight = new THREE.HemisphereLight(0x0000ff, 0xff0000, 1) // 하늘색과 지상색 설정
-  // scene.add(hemisphereLight)
-
-  const pointLight = new THREE.PointLight(0xffffff, 1)
-  // scene.add(pointLight)
-  pointLight.position.set(-2, 0.5, 0.5)
-  const plHelper = new THREE.PointLightHelper(pointLight, 0.1) 
-  // scene.add(plHelper)
-  // pointLight.castShadow = true // 그림자 O
-
-  const rectLight = new THREE.RectAreaLight(0xffffff, 2, 1, 0.5)
-  // scene.add(rectLight)
-  rectLight.position.set(0.5, 0.5, 1)
-  // rectLight.castShadow = true // 그림자 X
-
-  const spotLight = new THREE.SpotLight(0xffffff, 0.5)
-  spotLight.position.set(1, 2, 1)
-  // scene.add(spotLight)
-  // spotLight.castShadow = true // 그림자 O
-
-
   // 도형
-  // const geometry = new THREE.SphereGeometry(0.5, 32, 16)
-  const geometry = new THREE.ConeGeometry(0.4, 0.7, 6)
+  const geometry = new THREE.IcosahedronGeometry(0.5, 0)
   const material = new THREE.MeshStandardMaterial({ 
     color: 0x004fff
   })
@@ -86,8 +71,16 @@ if (WEBGL.isWebGLAvailable()) {
     renderer.render(scene, camera)
     requestAnimationFrame(render)
   }
-
   requestAnimationFrame(render)
+
+  function animate() {
+    requestAnimationFrame(animate)
+
+    obj.rotation.y += 0.04 
+    controls.update()
+    renderer.render(scene, camera)
+  }
+  animate()
 
   // 반응형 처리
   function onWindowResize() {
