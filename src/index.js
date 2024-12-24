@@ -16,18 +16,24 @@ if (WEBGL.isWebGLAvailable()) {
     antialias: true
   })
   renderer.setSize(window.innerWidth, window.innerHeight)
+  renderer.shadowMap.enabled = true
 
   document.body.appendChild(renderer.domElement)
 
   // 빛
-  const ambientLight = new THREE.AmbientLight(0xffA500, 0.1) // 전역에서 비추는 빛이라 안보임
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5) // 전역에서 비추는 빛이라 안보임
   // scene.add(ambientLight)
+  // ambientLight.castShadow = true  // 그림자 X
 
   const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5)
-  directionalLight.position.set(-1, 1, 1)
+  directionalLight.position.set(-0.5, 1.5, -0.5)
   const dlHelper = new THREE.DirectionalLightHelper(directionalLight, 0.5, 0x0000ff) // 빛이 어디서 쏘는 지 알려줌
   scene.add(directionalLight)
-  // scene.add(dlHelper)
+  scene.add(dlHelper)
+  directionalLight.castShadow = true // 그림자 O
+  directionalLight.shadow.mapSize.width = 1024
+  directionalLight.shadow.mapSize.height = 1024
+  directionalLight.shadow.radius = 8 // 그림자 블러
 
   const hemisphereLight = new THREE.HemisphereLight(0x0000ff, 0xff0000, 1) // 하늘색과 지상색 설정
   // scene.add(hemisphereLight)
@@ -37,24 +43,30 @@ if (WEBGL.isWebGLAvailable()) {
   pointLight.position.set(-2, 0.5, 0.5)
   const plHelper = new THREE.PointLightHelper(pointLight, 0.1) 
   // scene.add(plHelper)
+  // pointLight.castShadow = true // 그림자 O
 
   const rectLight = new THREE.RectAreaLight(0xffffff, 2, 1, 0.5)
   // scene.add(rectLight)
   rectLight.position.set(0.5, 0.5, 1)
+  // rectLight.castShadow = true // 그림자 X
 
   const spotLight = new THREE.SpotLight(0xffffff, 0.5)
-  scene.add(spotLight)
+  spotLight.position.set(1, 2, 1)
+  // scene.add(spotLight)
+  // spotLight.castShadow = true // 그림자 O
 
 
   // 도형
-  const geometry = new THREE.SphereGeometry(0.5, 32, 16)
+  // const geometry = new THREE.SphereGeometry(0.5, 32, 16)
+  const geometry = new THREE.ConeGeometry(0.4, 0.7, 6)
   const material = new THREE.MeshStandardMaterial({ 
-    color: 0xffffff
+    color: 0x004fff
   })
   const obj = new THREE.Mesh(geometry, material)
   obj.rotation.y = 0.5
   obj.position.y = 0.2
   scene.add(obj)
+  obj.castShadow = true
   
   const planeGeometry = new THREE.PlaneGeometry(20, 20, 1, 1)
   const planeMaterial = new THREE.MeshStandardMaterial({ 
@@ -64,6 +76,8 @@ if (WEBGL.isWebGLAvailable()) {
   plane.rotation.x = -0.5 * Math.PI
   plane.position.y = -0.2
   scene.add(plane)
+  plane.receiveShadow = true
+
   function render(time) {
     time *= 0.001
 
