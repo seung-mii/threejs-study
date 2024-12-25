@@ -1,26 +1,18 @@
 import * as THREE from 'three'
 import { WEBGL } from './webgl'
-import { OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
 if (WEBGL.isWebGLAvailable()) {
-  
-  const FogColor = 0x004fff
-  const objColor = 0xffffff
-  const FloorColor = 0x555555
-
   // 장면
   const scene = new THREE.Scene()
-  scene.background = new THREE.Color(FogColor)
-  // 안개
-  // 1번 : 안개와의 거리로 조절하는 방법
-  // scene.fog = new THREE.Fog(FogColor, 1, 8)
-  // 2번 : 안개의 밀도로 조절하는 방법
-  scene.fog = new THREE.FogExp2(FogColor, 0.5)
+  scene.background = new THREE.Color(0xeeeeee)
+  const axesHelper = new THREE.AxesHelper(5)
+  scene.add(axesHelper)
 
   // 카메라
-  const camera = new THREE.PerspectiveCamera(120, window.innerWidth / window.innerHeight, 0.1, 1000)
-  camera.position.set(0, 1, 1.8)
-  camera.lookAt(new THREE.Vector3(0, 0, 0))
+  const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 4000)
+  camera.position.set(0, 20, 100)
+  camera.lookAt(0, 0, 0)
 
   // 렌더러
   const renderer = new THREE.WebGLRenderer({
@@ -28,41 +20,71 @@ if (WEBGL.isWebGLAvailable()) {
     antialias: true
   })
   renderer.setSize(window.innerWidth, window.innerHeight)
-  renderer.shadowMap.enabled = true
 
   document.body.appendChild(renderer.domElement)
 
   // OrbitControls 추가
   const controls = new OrbitControls(camera, renderer.domElement)
-  controls.minDistance = 1
-  controls.maxPolarAngle = Math.PI / 2  // 중간 이상 내려가지 않음
+  controls.minDistance = 20
+  controls.maxDistance = 800
   controls.update()
 
   // 빛
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
-  directionalLight.position.set(1, 1, 1)
-  scene.add(directionalLight)
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
+  scene.add(ambientLight)
+  
+  // 텍스처
+  const skyMaterialArray = []
+  const texture_ft = new THREE.TextureLoader().load('../static/img/bay_ft.jpg')
+  const texture_bk = new THREE.TextureLoader().load('../static/img/bay_bk.jpg')
+  const texture_up = new THREE.TextureLoader().load('../static/img/bay_up.jpg')
+  const texture_dn = new THREE.TextureLoader().load('../static/img/bay_dn.jpg')
+  const texture_rt = new THREE.TextureLoader().load('../static/img/bay_rt.jpg')
+  const texture_lf = new THREE.TextureLoader().load('../static/img/bay_lf.jpg')
+  skyMaterialArray.push(
+    new THREE.MeshStandardMaterial({
+      map: texture_ft
+    })
+  )
+  skyMaterialArray.push(
+    new THREE.MeshStandardMaterial({
+      map: texture_bk
+    })
+  )
+  skyMaterialArray.push(
+    new THREE.MeshStandardMaterial({
+      map: texture_up
+    })
+  )
+  skyMaterialArray.push(
+    new THREE.MeshStandardMaterial({
+      map: texture_dn
+    })
+  )
+  skyMaterialArray.push(
+    new THREE.MeshStandardMaterial({
+      map: texture_rt
+    })
+  )
+  skyMaterialArray.push(
+    new THREE.MeshStandardMaterial({
+      map: texture_lf
+    })
+  )
+  for (let i = 0; i < 6; i++){
+    skyMaterialArray[i].side = THREE.BackSide
+  }
 
   // 도형
-  const geometry = new THREE.TorusGeometry(0.7, 0.3, 12, 80)
-  const material = new THREE.MeshStandardMaterial({ 
-    color: objColor
-  })
-  const obj = new THREE.Mesh(geometry, material)
-  obj.position.y = 0.8
-  obj.position.z = 0
-  scene.add(obj)
+  const skyGeometry = new THREE.BoxGeometry(2400, 2400, 2400)
+  // const skyMaterial = new THREE.MeshStandardMaterial({ 
+  //   // color: 0x333333,
+  //   map: texture
+  // })
+  // skyMaterial.side = THREE.BackSide // = 안쪽에 texture를 입히겠다
+  const sky = new THREE.Mesh(skyGeometry, skyMaterialArray)
+  scene.add(sky)
   
-  const planeGeometry = new THREE.PlaneGeometry(30, 30, 1, 1)
-  const planeMaterial = new THREE.MeshStandardMaterial({ 
-    color: FloorColor
-  })
-  const plane = new THREE.Mesh(planeGeometry, planeMaterial)
-  plane.rotation.x = -0.5 * Math.PI
-  plane.position.y = -0.2
-  scene.add(plane)
-  plane.receiveShadow = true
-
   function render(time) {
     time *= 0.001
 
@@ -75,9 +97,6 @@ if (WEBGL.isWebGLAvailable()) {
 
   function animate() {
     requestAnimationFrame(animate)
-
-    obj.rotation.y += 0.04
-    controls.update()
     renderer.render(scene, camera)
   }
   animate()
