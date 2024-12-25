@@ -2,10 +2,20 @@ import * as THREE from 'three'
 import { WEBGL } from './webgl'
 import { OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 
-
 if (WEBGL.isWebGLAvailable()) {
+  
+  const FogColor = 0x004fff
+  const objColor = 0xffffff
+  const FloorColor = 0x555555
+
   // 장면
   const scene = new THREE.Scene()
+  scene.background = new THREE.Color(FogColor)
+  // 안개
+  // 1번 : 안개와의 거리로 조절하는 방법
+  // scene.fog = new THREE.Fog(FogColor, 1, 8)
+  // 2번 : 안개의 밀도로 조절하는 방법
+  scene.fog = new THREE.FogExp2(FogColor, 0.5)
 
   // 카메라
   const camera = new THREE.PerspectiveCamera(120, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -29,33 +39,23 @@ if (WEBGL.isWebGLAvailable()) {
   controls.update()
 
   // 빛
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5) // 전역에서 비추는 빛이라 안보임
-  scene.add(ambientLight)
-  
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5)
-  directionalLight.position.set(-1.5, 2, 1)
-  const dlHelper = new THREE.DirectionalLightHelper(directionalLight, 0.2, 0x0000ff) // 빛이 어디서 쏘는 지 알려줌
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
+  directionalLight.position.set(1, 1, 1)
   scene.add(directionalLight)
-  scene.add(dlHelper)
-  directionalLight.castShadow = true // 그림자 O
-  directionalLight.shadow.mapSize.width = 1024
-  directionalLight.shadow.mapSize.height = 1024
-  directionalLight.shadow.radius = 8 // 그림자 블러
 
   // 도형
-  const geometry = new THREE.IcosahedronGeometry(0.5, 0)
+  const geometry = new THREE.TorusGeometry(0.7, 0.3, 12, 80)
   const material = new THREE.MeshStandardMaterial({ 
-    color: 0x004fff
+    color: objColor
   })
   const obj = new THREE.Mesh(geometry, material)
-  obj.rotation.y = 0.5
-  obj.position.y = 0.2
+  obj.position.y = 0.8
+  obj.position.z = 0
   scene.add(obj)
-  obj.castShadow = true
   
-  const planeGeometry = new THREE.PlaneGeometry(20, 20, 1, 1)
+  const planeGeometry = new THREE.PlaneGeometry(30, 30, 1, 1)
   const planeMaterial = new THREE.MeshStandardMaterial({ 
-    color: 0xffffff
+    color: FloorColor
   })
   const plane = new THREE.Mesh(planeGeometry, planeMaterial)
   plane.rotation.x = -0.5 * Math.PI
@@ -76,7 +76,7 @@ if (WEBGL.isWebGLAvailable()) {
   function animate() {
     requestAnimationFrame(animate)
 
-    obj.rotation.y += 0.04 
+    obj.rotation.y += 0.04
     controls.update()
     renderer.render(scene, camera)
   }
